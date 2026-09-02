@@ -1,0 +1,41 @@
+ZENJI — COMPLETE PROJECT (source + built site) — START HERE
+=============================================================
+
+WHAT IS IN THIS ZIP
+  /            -> the FULL Next.js source code (src, public, tests, configs,
+                  README, deploy notes). Everything from scratch to finished.
+  /docs        -> the BUILT static site (GitHub Pages ready), including
+                  /account (sign up / sign in), /counter (KAGE), /arcade,
+                  /closet fitting room, fit lab, drop, shrine, studio...
+
+WHY YOUR GITHUB SITE STILL SHOWED THE OLD VERSION
+  GitHub Pages serves ONLY the docs/ folder on branch main. Your previous push
+  left the old build inside docs/, so Pages kept serving it. Replacing docs/
+  with the one in this zip fixes it.
+
+UPDATE YOUR REPO (fozayelibnayaz/ZENJI-Anime-Streetwear)
+  1. Unzip this file into an empty folder on your computer.
+  2. In your clone of the repo, DELETE the old docs folder first:
+       rm -rf docs
+  3. Copy EVERYTHING from the unzipped folder into the repo root
+     (source files + the new docs folder). Keep the hidden .git folder.
+  4. git add -A
+     git commit -m "ZENJI complete project, chapters 01-06"
+     git push origin main
+  5. Repo Settings -> Pages: Source = Deploy from a branch,
+     Branch = main, Folder = /docs. Save.
+  6. Wait ~1 minute, then HARD REFRESH the site (Ctrl/Cmd + Shift + R).
+
+VERIFY IT LANDED
+  - Nav shows COUNTER and a Sign in chip.
+  - /ZENJI-Anime-Streetwear/account/ loads the house list (sign up / sign in).
+  - /ZENJI-Anime-Streetwear/counter/ loads KAGE; /arcade/ loads KOMA.
+  - View-source shows _next/static/Hyek55eAaE1bKNO9GK1AH/
+
+RUN IT LOCALLY INSTEAD
+  npm ci
+  npm run dev      -> http://localhost:3000
+  npm test         -> 88 tests
+
+Notes: PUSH-TO-GITHUB.sh automates a docs-only deploy if you prefer.
+VERCEL-NOTES.md explains hosting the source on Vercel.
