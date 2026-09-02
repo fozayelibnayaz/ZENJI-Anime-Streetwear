@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { FitLab } from "@/components/fitlab/FitLab";
+import { DnaQuiz } from "@/components/fitlab/DnaQuiz";
 
 export const metadata: Metadata = {
   title: "Fit Lab — find your size in 20 seconds",
@@ -59,6 +60,8 @@ export default function FitLabPage() {
           all.
         </p>
       </section>
+
+      <DnaQuiz />
     </div>
   );
 }

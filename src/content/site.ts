@@ -24,6 +24,10 @@ export const nav = [
   { href: "/drop-day", label: "Drop Day", note: "Live release console" },
   { href: "/fit-lab", label: "Fit Lab", note: "Find your size in 20 seconds" },
   { href: "/closet", label: "Closet", note: "Dress the figure" },
+  { href: "/shrine", label: "Shrine", note: "One omikuji a day" },
+  { href: "/studio", label: "Studio", note: "Cut your own card" },
+  { href: "/arcade", label: "Arcade", note: "KOMA + three games" },
+  { href: "/counter", label: "Counter", note: "Haggle with KAGE" },
   { href: "/origin", label: "Origin", note: "Why the label exists" },
   { href: "/support", label: "Support", note: "Shipping, returns, care" },
 ] as const;

@@ -7,6 +7,8 @@ import { getProduct, isSoldOut, relatedProducts } from "@/lib/catalogue";
 import { sizeCharts } from "@/content/sizing";
 import { centsToDollars } from "@/lib/money";
 import { ProductGallery } from "@/components/commerce/ProductGallery";
+import { Inspect360 } from "@/components/commerce/Inspect360";
+import { DnaBadge } from "@/components/commerce/DnaBadge";
 import { PurchasePanel } from "@/components/commerce/PurchasePanel";
 import { PriceTag } from "@/components/commerce/PriceTag";
 import { ProductGrid } from "@/components/commerce/ProductGrid";
@@ -86,7 +88,10 @@ export default async function ProductPage({ params }: PageProps) {
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-        <ProductGallery product={product} />
+        <div>
+          <ProductGallery product={product} />
+          <Inspect360 product={product} />
+        </div>
 
         <div className="lg:sticky lg:top-32 lg:self-start">
           <p className="label">
@@ -94,6 +99,7 @@ export default async function ProductPage({ params }: PageProps) {
             {product.romaji}
           </p>
           <h1 className="display mt-3 text-4xl sm:text-6xl">{product.name}</h1>
+          <DnaBadge product={product} />
           <PriceTag price={product.price} compareAt={product.compareAt} size="lg" className="mt-4" />
 
           <p className="mt-5 text-base leading-relaxed text-fog">{product.tagline}</p>

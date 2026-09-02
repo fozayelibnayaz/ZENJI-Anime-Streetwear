@@ -12,6 +12,7 @@ import { QuickView } from "@/components/commerce/QuickView";
 import { SizeGuide } from "@/components/commerce/SizeGuide";
 import { CommandConsole } from "@/components/commerce/CommandConsole";
 import { Toaster } from "@/components/ui/Toaster";
+import { Floorwalker } from "@/components/concierge/Floorwalker";
 
 /**
  * Fonts are self-hosted variable woff2 files, subset to latin and committed to
@@ -128,6 +129,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <QuickView />
               <SizeGuide />
               <CommandConsole />
+              <Floorwalker />
               <Toaster />
             </UIProvider>
           </LoadoutProvider>

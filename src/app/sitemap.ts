@@ -4,7 +4,7 @@ import { site } from "@/content/site";
 
 export const dynamic = "force-static";
 
-const routes = ["", "/drop", "/lookbook", "/drop-day", "/fit-lab", "/closet", "/origin", "/support"];
+const routes = ["", "/drop", "/lookbook", "/drop-day", "/fit-lab", "/closet", "/shrine", "/studio", "/arcade", "/origin", "/support"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

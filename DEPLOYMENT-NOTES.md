@@ -1,41 +1,62 @@
 # Deployment notes — ZENJI-Anime-Streetwear
 
-## Why the site showed the README instead of the storefront
+## Why the site once showed the README instead of the storefront
 
-Two separate bugs combined:
+Two bugs combined:
 
-1. **GitHub Pages source folder was `/ (root)` instead of `/docs`.**
-   There is no `index.html` at the repo root, so Pages fell back to rendering
-   `README.md` — which is exactly what you saw.
+1. **GitHub Pages source folder was `/ (root)` instead of `/docs`** — no `index.html`
+   at the root, so Pages rendered `README.md`.
+2. **The static build was compiled for the wrong base path** — the old
+   `build-pages.mjs` hardcoded `/ZENJI-Anime-Streetwear-Australia`, so every asset
+   URL 404'd under `/ZENJI-Anime-Streetwear/`.
 
-2. **The static build in `docs/` was built for the wrong base path.**
-   `scripts/build-pages.mjs` hardcoded `/ZENJI-Anime-Streetwear-Australia`, so
-   every one of the ~180 asset URLs in the built pages pointed at the old repo's
-   path and would have 404'd under `…/ZENJI-Anime-Streetwear/`.
+Both fixed: base path is now auto-derived from the repo name (`NEXT_PUBLIC_BASE_PATH`
+env → `git remote` repo name → fallback), and this bundle's `docs/` is rebuilt for
+`/ZENJI-Anime-Streetwear`.
 
-## What was fixed in this bundle
+## Publish to GitHub Pages (2 minutes)
 
-- `scripts/build-pages.mjs` now resolves the base path automatically:
-  `NEXT_PUBLIC_BASE_PATH` env var → else the repo name from `git remote get-url origin`
-  → else a hardcoded fallback. The same code now deploys correctly to any repo name.
-- `docs/` rebuilt from this repo's source with base path `/ZENJI-Anime-Streetwear`
-  (verified: 0 references to the old path, all 27 routes + assets return 200).
-- Canonical URL in `src/content/site.ts`, README and documentation updated to
-  `https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear/`.
-- lint, `tsc --noEmit` and all 55 unit tests pass.
+1. Push this bundle to the `ZENJI-Anime-Streetwear` repo:
+   ```bash
+   bash PUSH-TO-GITHUB.sh
+   ```
+2. GitHub: **Settings → Pages → Deploy from a branch → `main` + `/docs` → Save**.
+3. Open https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear/ (~1 min build).
 
-## How to publish (2 minutes)
+## Publish to Vercel (zero config)
 
-1. Push this bundle to the `ZENJI-Anime-Streetwear` repo (replacing its contents).
-2. On GitHub: **Settings → Pages → Build and deployment**:
-   - Source: **Deploy from a branch**
-   - Branch: **`main`** — Folder: **`/docs`** — **Save**
-3. Wait ~1 minute for the build, then open
-   https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear/
+1. vercel.com → **Add New… → Project** → import the repo.
+2. Framework preset: **Next.js** (auto). **No env vars** — base path stays empty on
+   a Vercel domain.
+3. Deploy; every push redeploys. `vercel.json` keeps trailing-slash routing.
 
-## Rebuilding later
+## The Showroom Update (this bundle)
 
-```bash
-npm install
-npm run deploy:pages   # lint → typecheck → tests → build with the repo's base path → republish docs/
-```
+New rooms, all static and stored on-device:
+
+- **The Floorwalker** — opt-in clerk (ring the bell). Asks three questions + your
+  Fit DNA, pulls three pieces, can hang them in your loadout.
+- **The Shrine** (`/shrine`) — one omikuji a day: shake the cylinder, unroll the
+  paper, get a seal code that rides in your loadout until midnight.
+- **Card Studio** (`/studio`) — direct a 4:5 editorial card (backdrop, piece, seal,
+  caption) and export a 1080×1350 PNG.
+- **Inspect-360** (product pages) — drag-spin turntable with inertia, 2.5× fabric
+  loupe, and a stitch X-ray drawn from the live size chart.
+- **Fit DNA** (Fit Lab) — five-question taste pentagon; match % follows you across
+  the store and feeds the Floorwalker.
+- **Closet Arcade** (Closet) — physical hanger rail (spring physics), three outfit
+  save slots, and **street cred** XP with ranks (Genji → Ukiyo Legend).
+
+### Chapter 04 — The Arcade (`/arcade`)
+
+- **KOMA** — original anime street cat mascot: cursor-tracking eyes, moods, and
+  he wears any print from the catalogue (famous licensed characters are a no —
+  rule 01, original art only).
+- **Slash the Drop** — fruit-slicer mini-game: blade trail, combos, bootleg
+  crates, 45s rounds; score converts to street cred.
+- **The Versus** — two looks enter the ring; crowning one teaches the
+  Floorwalker your taste.
+- **The Wall** — spray + stencil tag wall with PNG export.
+
+Quality gates at packaging time: lint 0 errors · `tsc --noEmit` clean · 67/67 unit
+tests · every route 200 in the dev sandbox.

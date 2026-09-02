@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClosetArcade } from "@/components/closet/ClosetArcade";
 import { ClosetConsole } from "@/components/closet/ClosetConsole";
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default function ClosetPage() {
       </header>
 
       <div className="mt-8">
+        <ClosetArcade />
         <ClosetConsole />
       </div>
     </div>

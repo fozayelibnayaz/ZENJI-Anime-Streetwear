@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, type ReactN
 import { usePersistentState } from "@/hooks/usePersistentState";
 import type { Size } from "@/content/products";
 import type { FitPreference } from "@/content/sizing";
+import type { FitDna } from "@/lib/dna";
 
 export interface StoredFit {
   size: Size;
@@ -24,6 +25,10 @@ interface Preferences {
   saved: string[];
   recent: string[];
   earlyAccess: boolean;
+  /** Fit DNA taste profile, sequenced in the Fit Lab. */
+  dna: FitDna | null;
+  /** Looks crowned in the Versus ring — the Floorwalker pulls like these. */
+  crowned: string[];
 }
 
 const DEFAULTS: Preferences = {
@@ -33,6 +38,8 @@ const DEFAULTS: Preferences = {
   saved: [],
   recent: [],
   earlyAccess: false,
+  dna: null,
+  crowned: [],
 };
 
 interface PreferencesContextValue extends Preferences {
@@ -45,6 +52,8 @@ interface PreferencesContextValue extends Preferences {
   isSaved: (slug: string) => boolean;
   noteVisit: (slug: string) => void;
   grantEarlyAccess: () => void;
+  setDna: (dna: FitDna | null) => void;
+  crown: (slug: string) => void;
 }
 
 const PreferencesContext = createContext<PreferencesContextValue | null>(null);
@@ -89,6 +98,14 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
 
   const grantEarlyAccess = useCallback(() => setPrefs((c) => ({ ...c, earlyAccess: true })), [setPrefs]);
 
+  const setDna = useCallback((dna: FitDna | null) => setPrefs((c) => ({ ...c, dna })), [setPrefs]);
+
+  const crown = useCallback(
+    (slug: string) =>
+      setPrefs((c) => ({ ...c, crowned: [slug, ...c.crowned.filter((s) => s !== slug)].slice(0, 8) })),
+    [setPrefs],
+  );
+
   const value = useMemo<PreferencesContextValue>(
     () => ({
       ...DEFAULTS,
@@ -102,8 +119,10 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
       isSaved: (slug: string) => prefs.saved?.includes(slug) ?? false,
       noteVisit,
       grantEarlyAccess,
+      setDna,
+      crown,
     }),
-    [prefs, hydrated, setMotion, toggleMotion, setUnit, setFit, toggleSaved, noteVisit, grantEarlyAccess],
+    [prefs, hydrated, setMotion, toggleMotion, setUnit, setFit, toggleSaved, noteVisit, grantEarlyAccess, setDna, crown],
   );
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;

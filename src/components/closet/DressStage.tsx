@@ -15,15 +15,18 @@ import {
   type Presentation,
 } from "@/lib/wardrobe";
 import { sizeCharts } from "@/content/sizing";
+import type { Category } from "@/content/products";
 import { cx } from "@/lib/cx";
 
 /**
  * THE CLOSET — the dress figure.
  *
- * A fixed 300×640 wireframe figure (proportions shift subtly with the chosen
- * frame) with the flat-lay garment photography overlaid on top, scaled so that
- * one size-chart centimetre is STAGE_SCALE pixels. Picking a bigger size
- * literally makes the garment render bigger on the body.
+ * A fixed 300×640 wireframe figure with the garment photography draped on it.
+ * Each photo is clipped to a garment-shaped silhouette (tee / hoodie / pant /
+ * cap) sized from the live size chart, so the concrete backdrop of the
+ * flat-lays disappears and the pieces hang on the body like real clothing —
+ * an S and a 2XL genuinely sit differently. Layers stack physically:
+ * pants under tees, tees under hoodies, cap on top.
  */
 
 const HEAD_CY = 50;
@@ -40,62 +43,74 @@ const ZONE_Y: Record<"torso" | "legs" | "head", number> = {
   legs: 294,
 };
 
-interface DressStageProps {
-  layers: DressLayer[];
-  presentation: Presentation;
-  frame: Frame;
-  className?: string;
-  /**
-   * Optional second size to ghost behind the worn one. Lets a shopper see the
-   * same garment at, say, M and 2XL on the figure without leaving the tool.
-   * Only renders for torso/legs garments (not caps).
-   */
-  compare?: DressLayer | null;
+/**
+ * Garment silhouettes, in % of the flat-lay photo box. They trim the concrete
+ * backdrop away and give each piece its worn shape on the figure.
+ */
+const CLIPS: Record<Category, string> = {
+  tee: "polygon(40% 12%, 28% 16%, 8% 36%, 14% 52%, 30% 46%, 31% 90%, 35% 93%, 65% 93%, 69% 90%, 70% 46%, 86% 52%, 92% 36%, 72% 16%, 60% 12%, 50% 15%)",
+  hoodie:
+    "polygon(50% 5%, 40% 8%, 34% 12%, 26% 20%, 10% 32%, 12% 72%, 24% 74%, 28% 50%, 30% 92%, 36% 95%, 64% 95%, 70% 92%, 72% 50%, 76% 74%, 88% 72%, 90% 32%, 74% 20%, 66% 12%, 60% 8%)",
+  pant: "polygon(33% 10%, 67% 10%, 71% 32%, 70% 52%, 66% 95%, 54% 96%, 51% 52%, 49% 52%, 46% 96%, 34% 95%, 30% 52%, 29% 32%)",
+  headwear:
+    "polygon(50% 10%, 68% 14%, 80% 26%, 84% 42%, 80% 54%, 68% 62%, 56% 66%, 44% 66%, 32% 62%, 20% 54%, 16% 42%, 20% 26%, 32% 14%)",
+};
+
+/** Draw order so outer layers win: pants < tee < hoodie < cap. */
+const Z_ORDER: Record<Category, number> = {
+  pant: 10,
+  tee: 20,
+  hoodie: 30,
+  headwear: 40,
+};
+
+interface Placed {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  z: number;
+  clip: string;
 }
 
-/** Coordinates (stage px) for one garment overlay. */
-function placement(layer: DressLayer) {
+/** Photo-box geometry per category, derived from the size chart. */
+function placement(layer: DressLayer): Placed {
   const { product, size } = layer;
   const chart = sizeCharts[product.category];
   const spec = chart.find((entry) => entry.size === size) ?? chart[0];
   const zone = CATEGORY_PLACEMENT[product.category].zone;
 
   if (zone === "head") {
-    const w = 96;
-    const h = 88;
-    return {
-      left: 150 - w / 2,
-      top: 22,
-      width: w,
-      height: h,
-      round: "50% 50% 46% 46% / 60% 60% 40% 40%",
-      bgPos: "center 30%",
-    };
+    const width = 132;
+    const height = 116;
+    return { left: 150 - width / 2, top: 8, width, height, z: Z_ORDER.headwear, clip: CLIPS.headwear };
   }
 
   if (zone === "legs") {
-    const width = cmToPx(spec.chest); // pants chart stores waist in `chest`
-    const height = cmToPx(spec.length);
+    const waist = cmToPx(spec.chest); // pants chart stores waist in `chest`
+    const width = waist * 1.7;
+    const height = cmToPx(spec.length) * 1.12;
     return {
       left: 150 - width / 2,
-      top: ZONE_Y.legs,
+      top: ZONE_Y.legs - height * 0.06,
       width,
       height,
-      round: "10px 10px 2px 2px",
-      bgPos: "center 12%",
+      z: Z_ORDER.pant,
+      clip: CLIPS.pant,
     };
   }
 
-  // torso (tee / hoodie) — anchored at the shoulder, sized by the actual pattern
-  const width = cmToPx(spec.chest);
-  const height = cmToPx(spec.length);
+  // torso (tee / hoodie) — anchored at the shoulder line
+  const chest = cmToPx(spec.chest);
+  const width = chest * (product.category === "hoodie" ? 1.75 : 1.7);
+  const height = cmToPx(spec.length) * (product.category === "hoodie" ? 1.3 : 1.25);
   return {
     left: 150 - width / 2,
-    top: ZONE_Y.torso,
+    top: ZONE_Y.torso - height * 0.1,
     width,
     height,
-    round: "10px 10px 6px 6px",
-    bgPos: "center 6%",
+    z: product.category === "hoodie" ? Z_ORDER.hoodie : Z_ORDER.tee,
+    clip: product.category === "hoodie" ? CLIPS.hoodie : CLIPS.tee,
   };
 }
 
@@ -152,6 +167,19 @@ function FigureSvg({ body }: { body: Body }) {
   );
 }
 
+interface DressStageProps {
+  layers: DressLayer[];
+  presentation: Presentation;
+  frame: Frame;
+  className?: string;
+  /**
+   * Optional second size to ghost behind the worn one. Lets a shopper see the
+   * same garment at, say, M and 2XL on the figure without leaving the tool.
+   * Only renders for torso/legs garments (not caps).
+   */
+  compare?: DressLayer | null;
+}
+
 export function DressStage({ layers, presentation, frame, className, compare }: DressStageProps) {
   const body = useMemo(() => bodyFor(presentation, frame), [presentation, frame]);
 
@@ -160,10 +188,10 @@ export function DressStage({ layers, presentation, frame, className, compare }: 
   const worn = useMemo(() => {
     const map = new Map<string, DressLayer>();
     for (const layer of layers) map.set(layer.product.category, layer);
-    return [...map.values()];
+    return [...map.values()].sort(
+      (a, b) => Z_ORDER[a.product.category] - Z_ORDER[b.product.category],
+    );
   }, [layers]);
-
-  const comparePlacement = compare ? placement(compare) : null;
 
   return (
     <div
@@ -184,44 +212,36 @@ export function DressStage({ layers, presentation, frame, className, compare }: 
         <FigureSvg body={body} />
 
         {/* optional ghost: the same garment in a second size, drawn underneath */}
-        {compare && comparePlacement && compare.product.category !== "headwear" ? (
-          <div
-            key={`compare-${compare.product.slug}-${compare.size}`}
-            className="absolute animate-[closet-dress_0.6s_var(--ease-slash)_0.1s_both] bg-cover opacity-45 grayscale-[0.4] will-change-transform"
-            style={{
-              left: `${pxToPct(comparePlacement.left, "x")}%`,
-              top: `${pxToPct(comparePlacement.top, "y")}%`,
-              width: `${pxToPct(comparePlacement.width, "x")}%`,
-              height: `${pxToPct(comparePlacement.height, "y")}%`,
-              borderRadius: comparePlacement.round,
-              backgroundImage: `url(${withBasePath(compare.product.images.front)})`,
-              backgroundSize: "cover",
-              backgroundPosition: comparePlacement.bgPos,
-              border: "1px dashed rgb(226 58 46 / 0.7)",
-              boxShadow: "0 18px 40px -18px rgb(0 0 0 / 0.8)",
-            }}
-          />
+        {compare && compare.product.category !== "headwear" ? (
+          <Ghost layer={compare} />
         ) : null}
 
-        {/* garments, top layer first so the outer piece wins */}
+        {/* garments, silhouette-clipped and stacked like real clothing */}
         {worn.map((layer) => {
           const p = placement(layer);
           return (
             <div
               key={`${layer.product.slug}-${layer.size}-${presentation}-${frame}`}
-              className="absolute animate-[closet-dress_0.6s_var(--ease-slash)_both] bg-cover will-change-transform"
+              className="absolute animate-[closet-dress_0.6s_var(--ease-slash)_both] will-change-transform"
               style={{
                 left: `${pxToPct(p.left, "x")}%`,
                 top: `${pxToPct(p.top, "y")}%`,
                 width: `${pxToPct(p.width, "x")}%`,
                 height: `${pxToPct(p.height, "y")}%`,
-                borderRadius: p.round,
-                backgroundImage: `url(${withBasePath(layer.product.images.front)})`,
-                backgroundSize: "cover",
-                backgroundPosition: p.bgPos,
-                boxShadow: "0 18px 40px -18px rgb(0 0 0 / 0.8)",
+                zIndex: p.z,
+                filter: "drop-shadow(0 14px 22px rgb(0 0 0 / 0.55))",
               }}
-            />
+            >
+              <div
+                className="absolute inset-0 bg-cover"
+                style={{
+                  clipPath: p.clip,
+                  backgroundImage: `url(${withBasePath(layer.product.images.front)})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center 8%",
+                }}
+              />
+            </div>
           );
         })}
       </div>
@@ -245,6 +265,35 @@ export function DressStage({ layers, presentation, frame, className, compare }: 
           </span>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/** Dashed-outline ghost of a second size, behind the worn garment. */
+function Ghost({ layer }: { layer: DressLayer }) {
+  const p = placement(layer);
+  return (
+    <div
+      key={`compare-${layer.product.slug}-${layer.size}`}
+      className="absolute animate-[closet-dress_0.6s_var(--ease-slash)_0.1s_both] opacity-45 grayscale-[0.4] will-change-transform"
+      style={{
+        left: `${pxToPct(p.left, "x")}%`,
+        top: `${pxToPct(p.top, "y")}%`,
+        width: `${pxToPct(p.width, "x")}%`,
+        height: `${pxToPct(p.height, "y")}%`,
+        zIndex: Math.max(1, p.z - 5),
+        filter: "drop-shadow(0 0 6px rgb(226 58 46 / 0.8))",
+      }}
+    >
+      <div
+        className="absolute inset-0 bg-cover"
+        style={{
+          clipPath: p.clip,
+          backgroundImage: `url(${withBasePath(layer.product.images.front)})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center 8%",
+        }}
+      />
     </div>
   );
 }

@@ -279,3 +279,94 @@ html[data-motion="off"] *::after {
   content-visibility: auto;
   contain-intrinsic-size: auto 600px;
 }
+
+/* ---------- SHOWROOM UPDATE: floorwalker, shrine, dna, arcade ---------- */
+
+@keyframes fw-bell-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(226, 58, 46, 0.45); }
+  60% { box-shadow: 0 0 0 14px rgba(226, 58, 46, 0); }
+}
+.fw-bell { animation: fw-bell-pulse 2.6s var(--ease-cut) infinite; }
+
+@keyframes fw-dot-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(-3px); opacity: 1; }
+}
+.fw-dot { animation: fw-dot-bounce 0.9s ease-in-out infinite; }
+
+@keyframes fw-blink-eyes {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+.fw-blink { transform-origin: 32px 23px; animation: fw-blink-eyes 4.2s linear infinite; }
+
+@keyframes fw-bow-once {
+  0% { transform: rotate(0deg); }
+  35% { transform: rotate(9deg) translateY(2px); }
+  100% { transform: rotate(0deg); }
+}
+.fw-bow { transform-origin: 50% 90%; animation: fw-bow-once 1.1s var(--ease-slash); }
+
+@keyframes omikuji-wobble {
+  0% { transform: rotate(calc(var(--wobble, 0px) * -0.6)); }
+  50% { transform: rotate(var(--wobble, 0px)); }
+  100% { transform: rotate(calc(var(--wobble, 0px) * -0.6)); }
+}
+.omikuji-shake { animation: omikuji-wobble 0.16s linear infinite; }
+
+@keyframes omikuji-stick-pop {
+  0% { transform: translateY(46px); opacity: 0; }
+  60% { transform: translateY(-6px); opacity: 1; }
+  100% { transform: translateY(0); }
+}
+.omikuji-stick { animation: omikuji-stick-pop 0.7s var(--ease-slash); }
+
+@keyframes omikuji-unroll {
+  0% { clip-path: inset(0 0 100% 0); transform: translateY(8px); }
+  100% { clip-path: inset(0 0 0% 0); transform: translateY(0); }
+}
+.omikuji-paper { animation: omikuji-unroll 0.9s var(--ease-slash); }
+
+@keyframes seal-stamp-in {
+  0% { transform: scale(2.4) rotate(-14deg); opacity: 0; }
+  55% { transform: scale(0.94) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.stamp-in { animation: seal-stamp-in 0.6s var(--ease-cut) 0.35s backwards; }
+
+@keyframes dna-radar-in {
+  0% { transform: scale(0.2); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.dna-in { transform-origin: 110px 110px; animation: dna-radar-in 0.8s var(--ease-slash); }
+
+/* ---------- ARCADE: KOMA + crates ---------- */
+
+@keyframes koma-bounce {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+}
+.koma-cheer { animation: koma-bounce 0.7s var(--ease-slash); }
+.koma-cheer .koma-arm-l { transform: rotate(38deg); transform-origin: 64px 122px; }
+.koma-cheer .koma-arm-r { transform: rotate(-38deg); transform-origin: 136px 122px; }
+
+.koma-sulk .koma-head { transform: translateY(6px) rotate(-4deg); }
+.koma-sulk .koma-ear-l { transform: rotate(-18deg); transform-origin: 74px 40px; }
+.koma-sulk .koma-ear-r { transform: rotate(18deg); transform-origin: 126px 40px; }
+.koma-head, .koma-ear-l, .koma-ear-r, .koma-arm-l, .koma-arm-r { transition: transform 0.35s var(--ease-slash); }
+
+@keyframes crate-half-left {
+  to { transform: translate(-26px, 30px) rotate(-28deg); opacity: 0; }
+}
+@keyframes crate-half-right {
+  to { transform: translate(26px, 30px) rotate(28deg); opacity: 0; }
+}
+.crate-half-l { animation: crate-half-left 0.8s var(--ease-cut) forwards; }
+.crate-half-r { animation: crate-half-right 0.8s var(--ease-cut) forwards; }
+
+/* KAGE — the counter's shopkeeper */
+@keyframes kage-blink-eyes {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+.kage-blink { transform-origin: 50px 50px; animation: kage-blink-eyes 1.1s linear infinite; }

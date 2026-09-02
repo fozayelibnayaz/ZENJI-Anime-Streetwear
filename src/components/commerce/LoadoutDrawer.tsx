@@ -9,6 +9,7 @@ import { useLoadout, type LoadoutItem } from "@/providers/LoadoutProvider";
 import { useUI } from "@/providers/UIProvider";
 import { Sheet } from "@/components/ui/Sheet";
 import { Action, ActionLink } from "@/components/ui/Action";
+import { useFortune } from "@/hooks/useFortune";
 
 /** The cart. Called a loadout because that is what the customer calls it. */
 export function LoadoutDrawer() {
@@ -138,6 +139,7 @@ export function LoadoutDrawer() {
       )}
 
       <footer className="border-t border-bone/10 px-5 py-5">
+        <FortuneLine />
         <div className="flex items-baseline justify-between">
           <span className="label">Subtotal</span>
           <span className="display text-2xl">{formatPrice(subtotal)}</span>
@@ -157,5 +159,19 @@ export function LoadoutDrawer() {
         </p>
       </footer>
     </Sheet>
+  );
+}
+
+/** Today's omikuji seal, honoured (display-only) in the loadout. */
+function FortuneLine() {
+  const { todaysFortune } = useFortune();
+  if (!todaysFortune) return null;
+  return (
+    <p className="mb-4 flex flex-wrap items-baseline justify-between gap-2 border border-oxide/40 bg-oxide/10 px-3 py-2 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-oxide">
+      <span>
+        <span className="jp mr-1 text-base">{todaysFortune.kanji}</span> omikuji seal · {todaysFortune.code}
+      </span>
+      <span>−{todaysFortune.discountPct}% today</span>
+    </p>
   );
 }

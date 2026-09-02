@@ -114,3 +114,23 @@ Frontend only: there is no backend, database, auth or payment integration. Check
 and the contact form are wired up to real validation and states but say plainly that nothing is sent.
 Product photography is art-directed placeholder imagery produced for this concept build.
 # ZENJI-Anime-Streetwear
+
+## Deploying to Vercel
+
+The site is a fully static Next.js export, so Vercel hosting is zero-config:
+
+1. **vercel.com → Add New… → Project** and import the repository.
+2. Framework preset auto-detects **Next.js**. Leave the build command as `next build`.
+3. **Do not set `NEXT_PUBLIC_BASE_PATH`** — on a Vercel domain the site lives at `/`,
+   and the config falls back to an empty base path automatically.
+4. Deploy. Every push to `main` redeploys; PRs get preview URLs.
+
+Prefer the CLI?
+
+```bash
+npx vercel link     # once, in the project root
+npx vercel --prod
+```
+
+Want pure static hosting elsewhere instead? `npm run build` (with `NEXT_PUBLIC_BASE_PATH`
+unset) produces `out/` — upload that folder to any CDN or bucket.

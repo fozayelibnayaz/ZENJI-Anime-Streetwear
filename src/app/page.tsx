@@ -4,6 +4,7 @@ import { FitLabTeaser } from "@/components/home/FitLabTeaser";
 import { DropDayStrip } from "@/components/home/DropDayStrip";
 import { LookbookStrip } from "@/components/home/LookbookStrip";
 import { ClosetTeaser } from "@/components/home/ClosetTeaser";
+import { ShowroomStrip } from "@/components/home/ShowroomStrip";
 import { EthosGrid } from "@/components/home/EthosGrid";
 
 export default function HomePage() {
@@ -15,6 +16,7 @@ export default function HomePage() {
       <DropDayStrip />
       <LookbookStrip />
       <ClosetTeaser />
+      <ShowroomStrip />
       <EthosGrid />
     </>
   );

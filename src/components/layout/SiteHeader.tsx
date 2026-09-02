@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { nav, site, tickerItems } from "@/content/site";
 import { cx } from "@/lib/cx";
+import { useMember } from "@/hooks/useMember";
 import { useLoadout } from "@/providers/LoadoutProvider";
 import { useUI } from "@/providers/UIProvider";
 import { Marquee } from "@/components/ui/Marquee";
@@ -13,6 +14,7 @@ export function SiteHeader() {
   const pathname = usePathname();
   const { openOverlay } = useUI();
   const { count, hydrated } = useLoadout();
+  const { account } = useMember();
   const [menuOpen, setMenuOpen] = useState(false);
   const [condensed, setCondensed] = useState(false);
 
@@ -59,8 +61,8 @@ export function SiteHeader() {
             <span className="jp text-xs text-steel transition-colors group-hover:text-bone">{site.kanji}</span>
           </Link>
 
-          <nav aria-label="Primary" className="hidden lg:block">
-            <ul className="flex items-center gap-7">
+          <nav aria-label="Primary" className="hidden xl:block">
+            <ul className="flex items-center gap-5">
               {nav.map((item) => (
                 <li key={item.href}>
                   <Link
@@ -86,6 +88,17 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <Link
+              href="/account"
+              className="flex h-9 items-center gap-1.5 border border-bone/15 px-3 font-mono text-[0.66rem] uppercase tracking-[0.16em] text-steel transition-colors hover:border-oxide hover:text-oxide"
+              aria-label={account ? `Signed in as ${account.handle} — open account` : "Sign in or join the house list"}
+            >
+              <span aria-hidden="true">◍</span>
+              <span className="hidden md:inline">
+                {!hydrated ? "Member" : account ? `@${account.handle}` : "Sign in"}
+              </span>
+            </Link>
+
             <button
               type="button"
               onClick={() => openOverlay("console")}
