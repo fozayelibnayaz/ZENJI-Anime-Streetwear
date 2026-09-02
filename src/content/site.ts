@@ -6,7 +6,7 @@ export const site = {
   tagline: "Anime streetwear, made in Naarm / Melbourne.",
   description:
     "ZENJI is an independent anime-inspired streetwear label from Melbourne. Oversized heavyweight tees and fleece, original hand-drawn graphics, limited drops, shipped Australia-wide.",
-  url: "https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear-Australia",
+  url: "https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear",
   currency: "AUD",
   freeShippingThreshold: 10000, // cents
   studio: "Level 2, 61 Smith Street, Fitzroy VIC 3065",

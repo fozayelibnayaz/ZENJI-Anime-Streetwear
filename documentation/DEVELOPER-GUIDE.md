@@ -151,8 +151,11 @@ one-command path is:
 npm run deploy:pages   # lint → typecheck → unit tests → build with base path → republish /docs
 ```
 
-`scripts/build-pages.mjs` runs `next build` with `NEXT_PUBLIC_BASE_PATH=/ZENJI-Anime-Streetwear-Australia`,
-wipes and refills `docs/`, and writes `.nojekyll`. Everything in `docs/` is generated — never hand-edit it.
+`scripts/build-pages.mjs` runs `next build`, wiping and refilling `docs/`, and writes `.nojekyll`.
+The base path is resolved in this order: the `NEXT_PUBLIC_BASE_PATH` env var if set, otherwise the
+repository name from `git remote get-url origin` (so the project keeps working if it is renamed or
+forked — e.g. `/ZENJI-Anime-Streetwear`), otherwise a hardcoded fallback. Everything in `docs/` is
+generated — never hand-edit it.
 A reference GitHub Actions workflow lives at `documentation/github-actions-deploy.yml.example` if you want
 to move to Actions later (the token here is blocked from creating `.github/workflows/**`).
 

@@ -3,7 +3,7 @@
 Everything the storefront can do, in the order a real customer runs into it. Written for anyone:
 a reviewer, a new developer, or the person who ends up running the shop.
 
-**Live site:** https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear-Australia/
+**Live site:** https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear/
 
 ![Streetwear in a Melbourne laneway](assets/stock-melbourne-laneway.jpg)
 <sub>Reference imagery: Pexels (free licence) — the audience this store is built for: inner-Melbourne, 16–28, phone first.</sub>

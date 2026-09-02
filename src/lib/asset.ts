@@ -1,6 +1,6 @@
 /**
  * Static exports of a Next app can live under a sub-path (GitHub project pages
- * serve this repo from /ZENJI-Anime-Streetwear-Australia/). `next/image` with
+ * serve this repo from a project sub-path, e.g. /ZENJI-Anime-Streetwear/). `next/image` with
  * `unoptimized: true` passes the src through untouched, so anything we point at
  * /public has to be prefixed ourselves.
  *

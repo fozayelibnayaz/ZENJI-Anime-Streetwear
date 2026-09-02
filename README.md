@@ -3,7 +3,7 @@
 A frontend concept build for **ZENJI**, an independent anime-inspired streetwear label selling into
 the Australian market. Static Next.js, no backend, deployed to GitHub Pages.
 
-**Live:** https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear-Australia/
+**Live:** https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear/
 
 ---
 
@@ -87,6 +87,15 @@ Regenerate it with:
 ```bash
 npm run deploy:pages    # verify + build with the repo base path + copy out/ into docs/
 ```
+
+> **⚠️ Pages must point at `/docs`, not the repository root.**
+> In the repo: **Settings → Pages → Build and deployment → Source = "Deploy from a branch"**,
+> then **Branch = `main`, Folder = `/docs`**, and Save. If the folder is left as `/ (root)`,
+> Pages renders the `README.md` instead of the storefront.
+>
+> The base path is derived from the repository name automatically (here `/ZENJI-Anime-Streetwear`),
+> so the same code deploys correctly if the repo is renamed or forked. To override, export
+> `NEXT_PUBLIC_BASE_PATH` before building.
 
 `documentation/github-actions-deploy.yml.example` contains the equivalent GitHub Actions workflow
 (lint → typecheck → tests → export → deploy) for repositories where CI can publish Pages directly.
