@@ -1,0 +1,281 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   ZENJI design tokens
+   Sumi ink, bone paper, one oxide-red accent. Red is rationed: CTAs,
+   live states and sale prices only. Everything else is greyscale.
+   ------------------------------------------------------------------ */
+@theme {
+  --color-sumi: #0a0a0b;
+  --color-ink: #101114;
+  --color-slate: #17191d;
+  --color-ash: #2a2d33;
+  --color-steel: #7c8895;
+  --color-fog: #b9bec6;
+  --color-bone: #f2f0eb;
+  --color-oxide: #e23a2e;
+  --color-oxide-deep: #a72219;
+  --color-jade: #3ba676;
+
+  --font-display: var(--font-oswald), "Arial Narrow", sans-serif;
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-mono-jb), ui-monospace, monospace;
+
+  --ease-slash: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-cut: cubic-bezier(0.85, 0, 0.15, 1);
+
+  --shadow-panel: 0 24px 60px -32px rgb(0 0 0 / 0.9);
+
+  --breakpoint-xs: 24rem;
+}
+
+:root {
+  color-scheme: dark;
+  --rail: 1px solid rgb(242 240 235 / 0.1);
+  --grain-opacity: 0.045;
+  --page-gutter: 1.25rem;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --page-gutter: 2rem;
+  }
+}
+
+@media (min-width: 90rem) {
+  :root {
+    --page-gutter: 3.5rem;
+  }
+}
+
+* {
+  min-width: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  /* The sticky header must never cover an anchored section. */
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background-color: var(--color-sumi);
+  color: var(--color-bone);
+  font-family: var(--font-sans);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Kanji fall back to whatever CJK face the OS has; we never ship a 4MB webfont
+   for eight decorative glyphs. */
+.jp {
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic",
+    "Noto Sans JP", "Noto Sans CJK JP", "MS PGothic", var(--font-sans);
+  font-weight: 500;
+}
+
+::selection {
+  background: var(--color-oxide);
+  color: var(--color-bone);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-oxide);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+/* Firefox/Chrome scrollbar in brand colours — small detail, big "designed" tell. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ash) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-ash);
+  border: 3px solid var(--color-sumi);
+  border-radius: 99px;
+}
+
+@utility gutter {
+  padding-inline: var(--page-gutter);
+}
+
+@utility shell {
+  width: 100%;
+  max-width: 96rem;
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+}
+
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-steel);
+}
+
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+
+@utility hairline {
+  border-color: rgb(242 240 235 / 0.1);
+}
+
+/* ------------------------------------------------------------------
+   Print texture: halftone dots + paper grain, both pure CSS so they
+   cost nothing to download and scale to any DPR.
+   ------------------------------------------------------------------ */
+.halftone {
+  background-image: radial-gradient(
+    rgb(242 240 235 / 0.14) 1px,
+    transparent 1.1px
+  );
+  background-size: 6px 6px;
+}
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+.grid-rail {
+  background-image: linear-gradient(
+    to right,
+    rgb(242 240 235 / 0.06) 1px,
+    transparent 1px
+  );
+  background-size: 25% 100%;
+}
+
+/* ------------------------------------------------------------------
+   Motion. One idea: the slash. Sections cut in on a diagonal.
+   ------------------------------------------------------------------ */
+@keyframes zenji-slash-in {
+  from {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+    opacity: 0;
+  }
+  to {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    opacity: 1;
+  }
+}
+
+@keyframes zenji-rise {
+  from {
+    transform: translate3d(0, 18px, 0);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes zenji-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes zenji-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes zenji-scan {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(400%);
+  }
+}
+
+/* THE CLOSET — a garment slides and settles onto the dress figure, and the
+   figure itself breathes on a slow loop so the room never feels static. */
+@keyframes closet-dress {
+  from {
+    transform: translateY(-14px) scale(1.05);
+    opacity: 0;
+    filter: blur(2px);
+  }
+  to {
+    transform: none;
+    opacity: 1;
+    filter: none;
+  }
+}
+
+@keyframes closet-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.008);
+  }
+}
+
+.marquee-track {
+  animation: zenji-marquee var(--marquee-duration, 32s) linear infinite;
+}
+
+.live-dot {
+  animation: zenji-pulse 1.6s var(--ease-cut) infinite;
+}
+
+/* Respect the OS setting *and* the in-app toggle stored on <html>. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html[data-motion="off"] * ,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* Long pages: let the browser skip offscreen work. */
+.defer-paint {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}

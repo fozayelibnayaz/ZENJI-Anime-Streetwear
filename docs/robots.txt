@@ -1,0 +1,4 @@
+User-Agent: *
+Allow: /
+
+Sitemap: https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear-Australia/sitemap.xml
