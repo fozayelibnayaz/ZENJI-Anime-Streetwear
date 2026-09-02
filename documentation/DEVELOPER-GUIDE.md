@@ -1,162 +1,66 @@
-# Developer guide
+# ZENJI — Developer Guide
 
-Everything you need to change something without reading the whole codebase first.
+Static Next.js 16 (App Router) + Tailwind v4 + vitest. No backend: all state is client-side via
+`usePersistentState` (localStorage, SSR-safe hydration flags).
 
-## Run it
+## State & providers
 
-```bash
-npm install
-npm run dev            # http://localhost:3000
-npm run verify         # lint → types → unit tests → production build
-```
+- `src/providers/` — LoadoutProvider (bag), PreferencesProvider (size/frame/motion), UIProvider
+  (overlays, toasts).
+- `src/lib/cred.ts` — street cred ledger + levels; `useCred().earn(why, pts)`.
+- `src/hooks/usePersistentState.ts` — the single persistence primitive. Everything stored goes
+  through it; keys are `zenji.*.v1`.
+- `src/lib/members.ts` + `src/hooks/useMember.ts` — house list. `DATA_KEYS` lists the eight stores
+  that snapshot/restore on sign-in/out; swap this module for a cloud provider later without
+  touching UI.
 
-Node 22+. No environment variables are required for local development.
+## Money & sizes
 
-## The shape of the thing
+- All prices are AUD **cents**; format once via `formatPrice`.
+- `src/content/sizing.ts` — per-category charts (chest = pit-to-pit). `src/lib/wardrobe.ts` turns
+  charts + body frame into stage geometry (`cmToPx`, `STAGE_W/H`).
 
-```
-content  →  lib  →  components  →  app
- data      pure      presentation   routes
-           logic
-```
+## The fitting room (`src/components/closet/`)
 
-- **`src/content/*`** is plain typed data. No React, no imports from components.
-- **`src/lib/*`** is pure functions over that data: filtering, sizing maths, money, dates. Unit tested.
-- **`src/components/*`** renders. Anything with `useState` starts with `"use client"`.
-- **`src/app/*`** is routing and metadata only — pages compose sections, they do not contain layout logic.
+- `DressStage.tsx` renders garments as **clip-path silhouettes** (`CLIPS` per category, % of the
+  photo box) over a 300×640 wireframe; z-order pant < tee < hoodie < cap; placement derives from
+  the size chart so sizes render truthfully. Tune `CLIPS` if new product photography needs it.
+- `ClosetArcade.tsx` — the rail with spring physics (rAF, direct style writes, no re-renders),
+  slots, and Style Roulette.
 
-If you find yourself importing a component into `content` or `lib`, something has gone the wrong way round.
+## The Counter (`src/lib/counter.ts`)
 
----
+Pure + seeded: `hash`/`mulberry` derive everything from (day, slug, round) — no runtime RNG, so
+tests and shoppers see the same KAGE. `openDeal → applyMove/shake → discountPct/credFor`.
+UI: `src/components/counter/CounterGame.tsx` (mood-driven SVG portrait).
 
-## Common tasks
+## Arcade
 
-### Add a product
+`src/content/arcade.ts` + `src/components/arcade/*`, scores in `zenji.arcade.*`. Versus logic in
+`src/lib/versus.ts`.
 
-Open `src/content/products.ts` and copy an existing entry:
+## Adding a product
 
-```ts
-{
-  slug: "storm-caller-tee",        // becomes /drop/storm-caller-tee
-  name: "Storm Caller Tee",
-  category: "tee",                 // tee | hoodie | pant | headwear
-  drop: "shadow",                  // origin | shadow
-  price: 3999,                     // AUD *cents* — always integers
-  compareAt: 4999,                 // optional; must be higher than price
-  colourway: "Sumi Black / Storm",
-  swatch: "#4a5568",
-  kanji: "嵐",
-  romaji: "Arashi",
-  tagline: "One line that makes someone want it.",
-  story: "Where the graphic came from.",
-  fabric: "100% combed ring-spun cotton",
-  gsm: 240,
-  fit: "Boxy oversized, dropped shoulder",
-  care: ["Cold wash inside out", "Hang dry", "Iron on the reverse"],
-  stock: [ { size: "S", units: 6 }, { size: "M", units: 0 } ],
-  images: { front: "/media/products/storm-caller-front.webp" },
-  featured: false,
-  releasedAt: "2026-10-02",
-}
-```
+1. `src/content/products.ts` — slug, name, category, price, images, prints.
+2. Drop WebP art in `public/media/products/` (`-front.webp` etc.).
+3. Add a sizing row if the category chart needs it. Everything else (drop, closet, counter,
+  arcade dress-up) picks it up automatically.
 
-Drop the artwork into `art/raw/storm-caller-front.png`, run `npm run images`, and you are done:
-the route, the sitemap entry, search, filters, related products and the JSON-LD are all derived.
-
-A missing image is not fatal — the image script writes a branded placeholder so nothing ever renders
-as a broken `<img>`.
-
-### Change prices, stock or copy
-
-All of it is in `src/content`. `products.ts` for the catalogue, `site.ts` for brand copy, nav,
-shipping and the free-shipping threshold, `faq.ts`, `lookbook.ts`, `origin.ts`, `sizing.ts`, `seals.ts`.
-
-### Change the look
-
-Design tokens live at the top of `src/app/globals.css` inside `@theme`. Change `--color-oxide` and
-every CTA, live dot and sale price in the site changes with it. The utilities `shell`, `gutter`,
-`label`, `display` and `hairline` are defined in the same file.
-
-Fonts are self-hosted variable `woff2` files in `src/fonts`, wired up with `next/font/local` in
-`src/app/layout.tsx`. To swap a typeface, replace the file and the `localFont` call.
-
-### Add a page
-
-Create `src/app/<route>/page.tsx`, export `metadata`, add the route to `nav` in `src/content/site.ts`
-and to the list in `src/app/sitemap.ts`. That is the whole checklist.
-
-### Add an overlay
-
-Extend the `Overlay` union in `src/providers/UIProvider.tsx`, then build the panel on top of
-`components/ui/Sheet.tsx` — it already handles the backdrop, focus trap, `Esc`, scroll locking and
-the entrance animation. Mount it once in `src/app/layout.tsx`.
-
-### Extend the Closet
-
-The Closet is data-driven the same way the catalogue is. Add new weather looks by appending to
-`weatherScenarios` in `src/lib/wardrobe.ts` (a scenario is just a list of real product slugs in stack
-order — the resolver checks they exist). Frames and presentations are declared in the same file and
-only affect the figure's proportions; garment placement is derived from the size chart, never hardcoded.
-
-The figure itself is `src/components/closet/DressStage.tsx`. It draws a 300×640 wireframe figure and
-overlays each garment's flat-lay image, scaled so one size-chart centimetre equals `STAGE_SCALE`
-pixels. That single invariant is why an S and a 2XL render at genuinely different sizes. The console
-that drives it (`ClosetConsole.tsx`) has three modes — try on, stack, weather — all reusing the same
-stage.
-
-To add a new category, extend `CATEGORY_PLACEMENT` in `src/lib/wardrobe.ts` with a zone
-(`torso` | `legs` | `head`), then make sure a size chart exists for it in `src/content/sizing.ts`.
-
----
-
-## Conventions
-
-- **TypeScript strict, no `any`.** Content shapes are exported interfaces; components take typed props.
-- **Money is integer cents.** Format only at the edge with `formatPrice`.
-- **Animation is `transform`, `opacity` and `clip-path` only.** Nothing that triggers layout.
-- **No animation library.** `Reveal`, `usePointerSlash`, `useScrollProgress` and `useScrollVelocity`
-  cover everything the site does, in a few hundred lines total.
-- **Client state is derived, not duplicated.** Filters live in the URL; the selected size is derived
-  from the Fit Lab result plus the user's explicit choice.
-- **Images** always go through `components/ui/Img.tsx`, which applies the deployment base path.
-- **Comments explain why, not what.**
-
-## Testing
+## Quality gates
 
 ```bash
-npm run test                        # Vitest — sizing algorithm, catalogue queries, money, dates, content integrity
-npx playwright install chromium     # once
-npm run test:e2e                    # Playwright — desktop + Pixel 7 projects against the built export
+npm test           # 88 vitest tests over every pure module
+npm run lint       # eslint 9 flat config, 0 errors
+npm run typecheck  # strict tsc
 ```
 
-E2E covers: browse → quick view → add to cart → drawer, cart persistence across a reload, shareable
-filter URLs, the empty-filter state, the Fit Lab saving a size and it appearing on a product page,
-console search and navigation, `Esc` handling, keyboard control of the hero, one `h1` per route, no
-console errors, the 404, the mobile menu and the sticky buy bar.
-
-## Performance rules of thumb
-
-- Keep the homepage first-load JS under ~110KB gzipped. Check with `npm run build`.
-- Only the hero and the first two product cards are `priority`; everything else lazy loads.
-- Long sections carry `.defer-paint` (`content-visibility: auto`) so offscreen work is skipped.
-- New raw art goes through `npm run images` — never commit a PNG into `public`.
-
-## Deployment
-
-This repo publishes to GitHub Pages from the **`docs/` folder** on the working branch (Pages is
-configured as "branch + /docs", not Actions — the token for this repo cannot push workflow files). The
-one-command path is:
+## Building the Pages export
 
 ```bash
-npm run deploy:pages   # lint → typecheck → unit tests → build with base path → republish /docs
+NEXT_PUBLIC_BASE_PATH=/ZENJI-Anime-Streetwear npm run build
+rm -rf docs && mkdir docs && cp -R out/. docs/ && touch docs/.nojekyll
 ```
 
-`scripts/build-pages.mjs` runs `next build`, wiping and refilling `docs/`, and writes `.nojekyll`.
-The base path is resolved in this order: the `NEXT_PUBLIC_BASE_PATH` env var if set, otherwise the
-repository name from `git remote get-url origin` (so the project keeps working if it is renamed or
-forked — e.g. `/ZENJI-Anime-Streetwear`), otherwise a hardcoded fallback. Everything in `docs/` is
-generated — never hand-edit it.
-A reference GitHub Actions workflow lives at `documentation/github-actions-deploy.yml.example` if you want
-to move to Actions later (the token here is blocked from creating `.github/workflows/**`).
-
-For a root-domain host (e.g. Vercel), build with `NEXT_PUBLIC_BASE_PATH` unset and serve `out/`.
+`NEXT_PUBLIC_BASE_PATH` makes asset URLs work under the repo-name sub-path; `.nojekyll` stops
+GitHub Pages from stripping `_next/`. Dev-only `allowedDevOrigins` in `next.config.ts` keeps the
+sandbox preview's HMR alive; it does not affect the export.

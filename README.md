@@ -1,136 +1,76 @@
-# ZENJI — anime streetwear storefront
+# ZENJI 禅時 — Anime Streetwear, Melbourne
 
 A frontend concept build for **ZENJI**, an independent anime-inspired streetwear label selling into
-the Australian market. Static Next.js, no backend, deployed to GitHub Pages.
+the Australian market. Static Next.js (App Router) + Tailwind, no backend, deployable to GitHub Pages.
 
-**Live:** https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear/
+**Concept storefront:** https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear/ (after you deploy `docs/`)
 
 ---
 
-## What is in here
+## What is inside (Chapters 01–06)
 
-| | |
-|---|---|
-| **Framework** | Next.js 16 (App Router) · React 19 · TypeScript strict |
-| **Styling** | Tailwind CSS v4 (CSS-first tokens) + a small amount of hand-written CSS for the print textures |
-| **Animation** | None — no library. Hand-written hooks over `IntersectionObserver`, `requestAnimationFrame` and CSS `clip-path` |
-| **State** | Three React contexts with `useSyncExternalStore`-backed persistence |
-| **Data** | Typed content modules under `src/content` — a designer can change a product without touching a component |
-| **Tests** | Vitest (45 unit tests) + Playwright (desktop and mobile e2e) |
-| **Output** | `next build` → fully static `out/`, deployed by GitHub Actions |
+| Area | Route | What it does |
+|---|---|---|
+| Showroom | `/` `/drop` `/lookbook` | catalogue, lookbook, hero |
+| Drop Day | `/drop-day` | live release console with countdown |
+| Fit Lab | `/fit-lab` | size finder from two measurements, per-product charts |
+| Closet | `/closet` | digital fitting room: garments render as **worn silhouettes**, size-true XS–2XL, physical layering, outfit slots, **Style Roulette** |
+| Shrine | `/shrine` | one omikuji fortune a day |
+| Studio | `/studio` | member card designer + export |
+| Arcade | `/arcade` | KOMA the street cat, Slash the Drop, Versus ring, Tag Wall |
+| Counter | `/counter` | haggle with KAGE the salesman: mood, bluffs, walk-aways, rank leverage |
+| House List | `/account` | **sign up / sign in** — per-member cred, loadout, slots, slips (browser-stored, salted+hashed passcodes) |
+| Support/Origin | `/support` `/origin` | FAQ, care, story |
 
-## Features
+All characters (KOMA, KAGE, KIRA) are original — no licensed IP. The concierge clerk is opt-in only.
 
-- **Interactive hero** — drag a katana cut across the garment to reveal the back print. Mouse follows
-  on hover, touch follows a drag, arrow keys move it in steps, and it animates itself until you touch it.
-- **Fit Lab** — measure a tee you already own and get your ZENJI size, a boxiness score and the
-  centimetre difference for every size. The answer follows you into product pages and the cart.
-- **The Origin** — the brand story as vertical manga scrollytelling; degrades to a clean article
-  when motion is reduced.
-- **Drop Day console** — fortnightly countdown converted into the visitor's own timezone, a release
-  queue simulation, a live stock board and a kanji "seal test" that unlocks early access.
-- **SYSTEM console** — ⌘K / Ctrl+K (or `/`) opens one input that searches products, jumps between
-  pages, opens the size guide, switches units and toggles animation.
-- **Commerce** — loadout drawer with localStorage persistence and undo, quick view, URL-synced
-  filters, saved items, shoppable lookbook hotspots, sticky mobile buy bar, size guide.
-
-## Getting started
+## Quick start
 
 ```bash
-npm install
-npm run dev          # http://localhost:3000
+npm ci
+npm run dev        # http://localhost:3000
+npm test           # 88 unit tests
+npm run lint       # eslint, 0 errors
+npm run typecheck  # tsc --noEmit
+npm run build      # production build
 ```
 
-## Scripts
-
-| Script | What it does |
-|---|---|
-| `npm run dev` | Development server |
-| `npm run build` | Production static export into `out/` |
-| `npm run lint` | ESLint (Next core-web-vitals + React Compiler rules) |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run test` | Vitest unit suite |
-| `npm run test:e2e` | Playwright e2e against the built export (`npx playwright install chromium` first) |
-| `npm run images` | Compress `art/raw/*.png` into WebP under `public/media` |
-| `npm run verify` | lint → typecheck → unit tests → build |
-
-## Project layout
+## Project structure
 
 ```
-src/
-  app/            routes (App Router), metadata, sitemap, robots
-  components/
-    commerce/     product cards, gallery, purchase panel, cart, quick view, console
-    dropday/      release queue, stock board, seal test
-    fitlab/       sizing tool and SVG garment silhouettes
-    home/         homepage sections
-    layout/       header, footer, newsletter
-    lookbook/     shoppable editorial
-    origin/       manga scrollytelling
-    support/      FAQ browser, contact form
-    ui/           Reveal, Sheet, Marquee, Disclosure, Action, Img, Toaster
-  content/        products, sizing, lookbook, origin, faq, seals, site copy
-  hooks/          useInView, useScrollProgress, usePointerSlash, useFocusTrap, …
-  lib/            catalogue queries, fit algorithm, money, drop schedule, asset paths
-  providers/      LoadoutProvider, PreferencesProvider, UIProvider
-art/raw/          uncompressed source art (git-ignored, never deployed)
-documentation/  user manual, developer guide, design decisions
-docs/           generated static build published by GitHub Pages (see Deployment)
-tests/            unit (Vitest) and e2e (Playwright)
+src/app            routes (one folder per page)
+src/components     per-feature components (closet/, counter/, members/, arcade/, …)
+src/lib            pure logic: wardrobe, counter, cred, members, drop, dna, …
+src/content        data: products, sizing charts, site copy, arcade, floorwalker
+src/providers      loadout / preferences / UI state
+public/media       product + hero photography (optimised WebP)
+tests/unit         vitest suites for every pure module
+docs/              BUILT static site (GitHub Pages source) — regenerated, do not edit
 ```
 
-## Deployment
+## Deploy
 
-GitHub Pages serves this branch from the `/docs` folder, which holds the generated static build.
-Regenerate it with:
+- **GitHub Pages:** push this repo with `docs/` present; Settings → Pages → branch `main`, folder `/docs`.
+  `docs/` already contains `.nojekyll` (required, or Pages strips `_next/`).
+  See `DEPLOYMENT-NOTES.md` for the exact copy/push recipe and failure checklist.
+- **Vercel / any host:** deploy the *source* (not `docs/`); framework Next.js; optional
+  `NEXT_PUBLIC_BASE_PATH` for sub-path installs. See `VERCEL-NOTES.md`… (inside earlier bundles) / `DEPLOYMENT-NOTES.md`.
+
+Regenerate `docs/` from source:
 
 ```bash
-npm run deploy:pages    # verify + build with the repo base path + copy out/ into docs/
+NEXT_PUBLIC_BASE_PATH=/ZENJI-Anime-Streetwear npm run build
+rm -rf docs && mkdir docs && cp -R out/. docs/ && touch docs/.nojekyll
 ```
 
-> **⚠️ Pages must point at `/docs`, not the repository root.**
-> In the repo: **Settings → Pages → Build and deployment → Source = "Deploy from a branch"**,
-> then **Branch = `main`, Folder = `/docs`**, and Save. If the folder is left as `/ (root)`,
-> Pages renders the `README.md` instead of the storefront.
->
-> The base path is derived from the repository name automatically (here `/ZENJI-Anime-Streetwear`),
-> so the same code deploys correctly if the repo is renamed or forked. To override, export
-> `NEXT_PUBLIC_BASE_PATH` before building.
+## Documents
 
-`documentation/github-actions-deploy.yml.example` contains the equivalent GitHub Actions workflow
-(lint → typecheck → tests → export → deploy) for repositories where CI can publish Pages directly.
+- `documentation/USER-MANUAL.md` — shopper walkthrough of every page.
+- `documentation/DEVELOPER-GUIDE.md` — architecture, how to extend (products, sizes, games).
+- `DEPLOYMENT-NOTES.md` — making the live site current on GitHub Pages.
 
-To host the site anywhere else, run `npm run build` with `NEXT_PUBLIC_BASE_PATH` unset and upload `out/`.
+## House rules baked into the code
 
-## Documentation
-
-- [`documentation/USER-MANUAL.md`](documentation/USER-MANUAL.md) — illustrated walkthrough of every feature
-- [`documentation/DEVELOPER-GUIDE.md`](documentation/DEVELOPER-GUIDE.md) — how to add a product, change tokens, extend the site
-- [`documentation/DECISIONS.md`](documentation/DECISIONS.md) — why it is built this way
-
-## Notes
-
-Frontend only: there is no backend, database, auth or payment integration. Checkout, the newsletter
-and the contact form are wired up to real validation and states but say plainly that nothing is sent.
-Product photography is art-directed placeholder imagery produced for this concept build.
-# ZENJI-Anime-Streetwear
-
-## Deploying to Vercel
-
-The site is a fully static Next.js export, so Vercel hosting is zero-config:
-
-1. **vercel.com → Add New… → Project** and import the repository.
-2. Framework preset auto-detects **Next.js**. Leave the build command as `next build`.
-3. **Do not set `NEXT_PUBLIC_BASE_PATH`** — on a Vercel domain the site lives at `/`,
-   and the config falls back to an empty base path automatically.
-4. Deploy. Every push to `main` redeploys; PRs get preview URLs.
-
-Prefer the CLI?
-
-```bash
-npx vercel link     # once, in the project root
-npx vercel --prod
-```
-
-Want pure static hosting elsewhere instead? `npm run build` (with `NEXT_PUBLIC_BASE_PATH`
-unset) produces `out/` — upload that folder to any CDN or bucket.
+1. Original characters and prints only.
+2. Concierge is opt-in (the bell), never auto-opens.
+3. Size honesty: the figure on `/closet` is literally the size chart, not an illustration.

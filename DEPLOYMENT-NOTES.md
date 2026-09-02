@@ -1,62 +1,55 @@
-# Deployment notes — ZENJI-Anime-Streetwear
+# ZENJI — Deployment Notes (GitHub Pages)
 
-## Why the site once showed the README instead of the storefront
+The live concept site is the `docs/` folder of this repo, served by GitHub Pages from
+**branch `main`, folder `/docs`**. The `docs/` shipped in this project is the exact build that
+runs in the development sandbox — same pages, same build id (see the manifest / view-source).
 
-Two bugs combined:
+## One-time Pages setting
 
-1. **GitHub Pages source folder was `/ (root)` instead of `/docs`** — no `index.html`
-   at the root, so Pages rendered `README.md`.
-2. **The static build was compiled for the wrong base path** — the old
-   `build-pages.mjs` hardcoded `/ZENJI-Anime-Streetwear-Australia`, so every asset
-   URL 404'd under `/ZENJI-Anime-Streetwear/`.
+Repo → **Settings → Pages → Build and deployment** → Source: *Deploy from a branch* →
+Branch: `main` · Folder: `/docs` → Save.
 
-Both fixed: base path is now auto-derived from the repo name (`NEXT_PUBLIC_BASE_PATH`
-env → `git remote` repo name → fallback), and this bundle's `docs/` is rebuilt for
-`/ZENJI-Anime-Streetwear`.
+## Making your live site current (exact recipe)
 
-## Publish to GitHub Pages (2 minutes)
+```bash
+# 1. fresh clone
+git clone https://github.com/fozayelibnayaz/ZENJI-Anime-Streetwear.git zenji-deploy
+cd zenji-deploy
 
-1. Push this bundle to the `ZENJI-Anime-Streetwear` repo:
-   ```bash
-   bash PUSH-TO-GITHUB.sh
-   ```
-2. GitHub: **Settings → Pages → Deploy from a branch → `main` + `/docs` → Save**.
-3. Open https://fozayelibnayaz.github.io/ZENJI-Anime-Streetwear/ (~1 min build).
+# 2. wipe everything except .git
+find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
 
-## Publish to Vercel (zero config)
+# 3. copy the CONTENTS of the unzipped project folder (trailing "/." = inside)
+cp -R /path/to/unzipped-folder/. .
 
-1. vercel.com → **Add New… → Project** → import the repo.
-2. Framework preset: **Next.js** (auto). **No env vars** — base path stays empty on
-   a Vercel domain.
-3. Deploy; every push redeploys. `vercel.json` keeps trailing-slash routing.
+# 4. sanity check — all three must print, no errors
+ls docs/index.html docs/.nojekyll src/app/account/page.tsx
 
-## The Showroom Update (this bundle)
+# 5. commit + push
+git add -A
+git commit -m "ZENJI complete project"
+git push origin main
+```
 
-New rooms, all static and stored on-device:
+Then wait ~1 minute and **hard-refresh** (Cmd/Ctrl+Shift+R). github.io is CDN-cached.
 
-- **The Floorwalker** — opt-in clerk (ring the bell). Asks three questions + your
-  Fit DNA, pulls three pieces, can hang them in your loadout.
-- **The Shrine** (`/shrine`) — one omikuji a day: shake the cylinder, unroll the
-  paper, get a seal code that rides in your loadout until midnight.
-- **Card Studio** (`/studio`) — direct a 4:5 editorial card (backdrop, piece, seal,
-  caption) and export a 1080×1350 PNG.
-- **Inspect-360** (product pages) — drag-spin turntable with inertia, 2.5× fabric
-  loupe, and a stitch X-ray drawn from the live size chart.
-- **Fit DNA** (Fit Lab) — five-question taste pentagon; match % follows you across
-  the store and feeds the Floorwalker.
-- **Closet Arcade** (Closet) — physical hanger rail (spring physics), three outfit
-  save slots, and **street cred** XP with ranks (Genji → Ukiyo Legend).
+## Why a push can look like "nothing changed"
 
-### Chapter 04 — The Arcade (`/arcade`)
+1. **Nested folder** — you copied the folder itself, so files landed at `ZENJI-…/docs/…` instead
+   of `docs/…`. Steps 2–3 above prevent this.
+2. **Old docs not deleted** — stale `_next` builds linger; index.html then points at chunks that
+   may or may not exist. Wipe `docs/` first (step 2 does).
+3. **Pages setting wrong** — anything other than `main` + `/docs` serves something else entirely.
+4. **Missing `.nojekyll`** — without it Pages strips `_next/` and the site loads unstyled/old.
+   This project ships `.nojekyll` inside `docs/`.
+5. **Cache** — hard-refresh, or append `?v=2` once.
 
-- **KOMA** — original anime street cat mascot: cursor-tracking eyes, moods, and
-  he wears any print from the catalogue (famous licensed characters are a no —
-  rule 01, original art only).
-- **Slash the Drop** — fruit-slicer mini-game: blade trail, combos, bootleg
-  crates, 45s rounds; score converts to street cred.
-- **The Versus** — two looks enter the ring; crowning one teaches the
-  Floorwalker your taste.
-- **The Wall** — spray + stencil tag wall with PNG export.
+## Verify it landed
 
-Quality gates at packaging time: lint 0 errors · `tsc --noEmit` clean · 67/67 unit
-tests · every route 200 in the dev sandbox.
+- View-source contains the build id printed in the downloads page / MANIFEST (`_next/static/<id>/`).
+- Nav shows COUNTER and a Sign-in chip; `/account`, `/counter`, `/arcade` load.
+
+## Vercel instead of Pages
+
+Import the **source** (not `docs/`) into Vercel; preset Next.js; no env vars for a root domain.
+Only set `NEXT_PUBLIC_BASE_PATH` for sub-path deploys. `docs/` is Pages-only.
